@@ -7,42 +7,49 @@
 
 <style>
 
-*{box-sizing:border-box}
-
-body{
+*{
+box-sizing:border-box;
 margin:0;
-font-family:Arial, sans-serif;
-background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
-overflow:hidden;
+padding:0;
 }
 
-/* Top Bar */
+body{
+font-family:Arial, sans-serif;
+background:linear-gradient(135deg,#0f2027,#203a43,#2c5364);
+height:100vh;
+overflow:hidden;
+color:white;
+}
+
+/* TOP BAR */
 
 #topbar{
 position:fixed;
-top:10px;
+top:15px;
 left:50%;
 transform:translateX(-50%);
-width:92%;
+width:85%;
+
 display:flex;
 gap:10px;
-padding:10px;
+padding:12px;
 
 background:rgba(255,255,255,0.08);
 backdrop-filter:blur(12px);
-border-radius:16px;
+
+border-radius:14px;
 border:1px solid rgba(255,255,255,0.15);
 
 z-index:20;
 }
 
-/* URL Input */
+/* INPUT */
 
 #urlBox{
 flex:1;
 padding:10px;
 border:none;
-border-radius:10px;
+border-radius:8px;
 background:rgba(255,255,255,0.15);
 color:white;
 outline:none;
@@ -52,16 +59,18 @@ outline:none;
 color:rgba(255,255,255,0.6);
 }
 
-/* Buttons */
+/* BUTTONS */
 
 button{
 padding:10px 16px;
 border:none;
-border-radius:10px;
+border-radius:8px;
 cursor:pointer;
-color:white;
+
 background:rgba(255,255,255,0.15);
-transition:.25s;
+color:white;
+
+transition:.2s;
 }
 
 button:hover{
@@ -69,40 +78,42 @@ background:rgba(255,255,255,0.3);
 transform:scale(1.05);
 }
 
-/* Tabs */
+/* TAB BAR */
 
 #tabs{
 position:fixed;
-top:65px;
-left:10px;
+top:80px;
+left:20px;
 display:flex;
-gap:6px;
+gap:8px;
 z-index:15;
 }
+
+/* TAB */
 
 .tab{
 display:flex;
 align-items:center;
 gap:8px;
 
-padding:7px 12px;
-border-radius:10px;
+padding:8px 14px;
+border-radius:8px;
+
 background:rgba(255,255,255,0.15);
-color:white;
 cursor:pointer;
 
 transition:.2s;
 }
 
 .tab:hover{
-background:rgba(255,255,255,0.3);
+background:rgba(255,255,255,0.25);
 }
 
 .activeTab{
 background:#4CAF50;
 }
 
-/* Close button */
+/* CLOSE BUTTON */
 
 .close{
 font-weight:bold;
@@ -114,22 +125,27 @@ opacity:.7;
 opacity:1;
 }
 
-/* Frames */
+/* FRAME AREA */
+
+#frames{
+position:absolute;
+top:120px;
+left:0;
+width:100%;
+height:calc(100% - 120px);
+}
+
+/* IFRAMES */
 
 iframe{
-position:absolute;
-top:0;
-left:0;
-width:100vw;
-height:100vh;
+width:100%;
+height:100%;
 border:none;
-
-opacity:0;
-transition:opacity .3s;
+display:none;
 }
 
 iframe.active{
-opacity:1;
+display:block;
 }
 
 </style>
@@ -206,7 +222,7 @@ activateTab(tab,frame);
 function activateTab(tab,frame){
 
 document.querySelectorAll(".tab").forEach(t=>t.classList.remove("activeTab"));
-document.querySelectorAll("iframe").forEach(f=>f.classList.remove("active"));
+document.querySelectorAll("#frames iframe").forEach(f=>f.classList.remove("active"));
 
 tab.classList.add("activeTab");
 frame.classList.add("active");
@@ -272,7 +288,7 @@ document.getElementById("urlBox").addEventListener("keypress",e=>{
 if(e.key==="Enter") openSite();
 });
 
-/* Start with first tab */
+/* Start with one tab */
 
 createTab();
 
