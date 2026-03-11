@@ -3,109 +3,112 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShadowProxy | 25+ Engines</title>
+    <title>ShadowProxy | 10+ Stealth Tunnels</title>
     <style>
         :root {
-            --bg-dark: #070707;
-            --bg-panel: #121212;
+            --bg-dark: #050505;
+            --bg-panel: #0f0f0f;
             --accent: #3b82f6;
-            --text-main: #e5e7eb;
+            --accent-glow: rgba(59, 130, 246, 0.4);
+            --text-main: #f9fafb;
             --text-dim: #9ca3af;
-            --border: #262626;
+            --border: #1f2937;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, -apple-system, sans-serif; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; }
         body { background-color: var(--bg-dark); height: 100vh; overflow: hidden; color: var(--text-main); display: flex; flex-direction: column; }
 
         /* --- UI Header --- */
-        header { background: var(--bg-panel); border-bottom: 1px solid var(--border); padding: 12px 18px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); z-index: 100; }
-        .nav-row { display: flex; gap: 10px; align-items: center; max-width: 1500px; margin: 0 auto; width: 100%; }
+        header { 
+            background: var(--bg-panel); 
+            border-bottom: 2px solid var(--border); 
+            padding: 14px 20px; 
+            z-index: 100;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+        }
+        .nav-row { display: flex; gap: 12px; align-items: center; max-width: 1600px; margin: 0 auto; width: 100%; }
         
-        #urlBox { flex: 1; padding: 11px 16px; border-radius: 10px; border: 1px solid var(--border); background: #000; color: var(--accent); outline: none; font-size: 14px; transition: 0.2s; }
-        #urlBox:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+        #urlBox { 
+            flex: 1; padding: 12px 18px; border-radius: 12px; border: 1px solid var(--border); 
+            background: #000; color: var(--accent); outline: none; font-size: 14px; 
+            transition: all 0.3s ease;
+        }
+        #urlBox:focus { border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); }
 
-        select, button { padding: 10px 14px; border-radius: 8px; border: 1px solid var(--border); background: #1a1a1a; color: var(--text-main); font-size: 13px; cursor: pointer; transition: 0.2s; }
-        select:hover, button:hover { background: #252525; border-color: var(--text-dim); }
-        .go-btn { background: var(--accent); border-color: var(--accent); font-weight: 700; color: #fff; padding: 10px 20px; }
-        .go-btn:hover { background: #2563eb; transform: translateY(-1px); }
+        select, button { 
+            padding: 10px 16px; border-radius: 10px; border: 1px solid var(--border); 
+            background: #18181b; color: var(--text-main); font-size: 13px; cursor: pointer; 
+            transition: 0.2s; 
+        }
+        select:hover { background: #27272a; }
+        .go-btn { background: var(--accent); border: none; font-weight: bold; color: white; padding: 10px 24px; box-shadow: 0 0 10px var(--accent-glow); }
+        .go-btn:hover { background: #2563eb; transform: scale(1.05); }
 
-        /* --- Tabs --- */
-        #tabs-bar { display: flex; gap: 6px; padding: 6px 15px 0; background: var(--bg-panel); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
-        .tab { display: flex; align-items: center; gap: 12px; padding: 10px 18px; background: rgba(255,255,255,0.03); border: 1px solid transparent; border-radius: 10px 10px 0 0; cursor: pointer; font-size: 12px; color: var(--text-dim); min-width: 130px; transition: 0.3s; }
-        .tab.activeTab { background: var(--bg-dark); color: var(--accent); border: 1px solid var(--border); border-bottom: 1px solid var(--bg-dark); margin-bottom: -1px; }
-        .close-tab { opacity: 0.3; font-size: 16px; font-weight: bold; }
-        .close-tab:hover { opacity: 1; color: #ff4d4d; }
+        /* --- Tab System --- */
+        #tabs-bar { display: flex; gap: 8px; padding: 8px 15px 0; background: var(--bg-panel); overflow-x: auto; scrollbar-width: none; }
+        .tab { 
+            display: flex; align-items: center; gap: 10px; padding: 12px 20px; 
+            background: #111; border: 1px solid var(--border); border-bottom: none; 
+            border-radius: 10px 10px 0 0; cursor: pointer; font-size: 12px; 
+            color: var(--text-dim); min-width: 140px; white-space: nowrap;
+        }
+        .tab.activeTab { background: var(--bg-dark); color: var(--accent); border-top: 2px solid var(--accent); font-weight: 600; }
+        .close-tab { font-size: 16px; margin-left: 5px; opacity: 0.4; transition: 0.2s; }
+        .close-tab:hover { color: #ef4444; opacity: 1; }
 
         /* --- Viewport --- */
         main { flex: 1; position: relative; background: #fff; }
         iframe { position: absolute; width: 100%; height: 100%; border: none; display: none; }
         iframe.active { display: block; }
         
-        .loading-screen { position: absolute; inset: 0; background: var(--bg-dark); z-index: 50; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .spinner { width: 30px; height: 30px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 15px; }
-        @keyframes spin { to { transform: rotate(360deg); } }
+        .loader { 
+            position: absolute; inset: 0; background: var(--bg-dark); z-index: 50; 
+            display: none; flex-direction: column; align-items: center; justify-content: center; 
+        }
+        .pulse { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { transform: scale(0.8); opacity: 0.8; } 100% { transform: scale(1.5); opacity: 0; } }
     </style>
 </head>
 <body>
 
 <header>
     <div class="nav-row">
-        <select id="proxySelect" title="Network Proxy">
-            <option value="https://api.allorigins.win/raw?url=">⚡ Proxy A (Compatibility)</option>
-            <option value="https://corsproxy.io/?">🚀 Proxy B (High Speed)</option>
-            <option value="https://api.codetabs.com/v1/proxy?quest=">🛡️ Proxy C (Stealth)</option>
-        </select>
-
-        <select id="engineSelect" title="Choose Search Engine">
-            <optgroup label="Mainstream">
-                <option value="https://www.google.com/search?q=">Google</option>
-                <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
-                <option value="https://www.bing.com/search?q=">Bing</option>
-                <option value="https://search.yahoo.com/search?p=">Yahoo</option>
-                <option value="https://search.brave.com/search?q=">Brave Search</option>
+        <select id="proxySelect" title="Select Network Tunnel">
+            <optgroup label="Fastest (CORS-ready)">
+                <option value="https://corsproxy.io/?">🚀 CorsProxy.io (Recommended)</option>
+                <option value="https://api.allorigins.win/raw?url=">⚡ AllOrigins (Direct)</option>
+                <option value="https://api.codetabs.com/v1/proxy?quest=">🛡️ CodeTabs (Stealth)</option>
             </optgroup>
-            <optgroup label="Privacy & Security">
-                <option value="https://www.startpage.com/sp/search?query=">Startpage</option>
-                <option value="https://www.qwant.com/?q=">Qwant</option>
-                <option value="https://searx.be/search?q=">SearXNG (Meta)</option>
-                <option value="https://www.swisscows.com/web?query=">Swisscows</option>
-                <option value="https://www.mojeek.com/search?q=">Mojeek</option>
+            <optgroup label="High Performance">
+                <option value="https://proxy.cors.sh/">🌐 CORS.SH (Unlimited)</option>
+                <option value="https://thingproxy.freeboard.io/fetch/">📁 ThingProxy (Lite)</option>
+                <option value="https://api.proxyscrape.com/v2/?request=getproxies&protocol=http&url=">🔍 ProxyScrape (Rotating)</option>
             </optgroup>
-            <optgroup label="Academic & Research">
-                <option value="https://scholar.google.com/scholar?q=">Google Scholar</option>
-                <option value="https://www.wolframalpha.com/input/?i=">WolframAlpha (Math)</option>
-                <option value="https://archive.org/search.php?query=">Internet Archive</option>
-                <option value="https://www.jstor.org/action/doBasicSearch?Query=">JSTOR</option>
-                <option value="https://en.wikipedia.org/wiki/Special:Search?search=">Wikipedia</option>
-            </optgroup>
-            <optgroup label="International">
-                <option value="https://yandex.com/search/?text=">Yandex (Russia)</option>
-                <option value="https://www.baidu.com/s?wd=">Baidu (China)</option>
-                <option value="https://www.naver.com/search.naver?query=">Naver (Korea)</option>
-                <option value="https://www.ecosia.org/search?q=">Ecosia (Eco)</option>
-            </optgroup>
-            <optgroup label="Tor/Deep Web (via Proxy)">
-                <option value="https://ahmia.fi/search/?q=">Ahmia (Onion Search)</option>
-                <option value="https://torchsearch.com/search?q=">Torch</option>
-            </optgroup>
-            <optgroup label="Browsers">
-                <option value="https://www.google.com/search?q=firefox+browser+">Firefox Mode</option>
-                <option value="https://www.google.com/search?q=opera+browser+">Opera Mode</option>
+            <optgroup label="International Tunnels">
+                <option value="https://api.allorigins.win/get?url=">🌍 Global Node A</option>
+                <option value="https://cors-anywhere.herokuapp.com/">🏰 Heroku Proxy (Legacy)</option>
+                <option value="https://whateverorigin.org/get?url=">🌀 WhateverOrigin</option>
             </optgroup>
         </select>
 
-        <input id="urlBox" type="text" placeholder="Enter URL or Search Query...">
-        <button class="go-btn" onclick="handleNavigation()">Navigate</button>
-        <button onclick="createNewTab()" style="font-size:18px;">+</button>
+        <select id="engineSelect" title="Search Engine">
+            <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
+            <option value="https://www.google.com/search?q=">Google</option>
+            <option value="https://search.brave.com/search?q=">Brave</option>
+            <option value="https://www.bing.com/search?q=">Bing</option>
+            <option value="https://yandex.com/search/?text=">Yandex</option>
+            <option value="https://ahmia.fi/search/?q=">Ahmia (Deep Web)</option>
+        </select>
+
+        <input id="urlBox" type="text" placeholder="Enter URL or Search...">
+        <button class="go-btn" onclick="handleNavigation()">GO</button>
+        <button onclick="createNewTab()" style="font-weight:bold;">+</button>
     </div>
 </header>
 
 <div id="tabs-bar"></div>
 <main id="frames-viewport">
-    <div id="loader" class="loading-screen">
-        <div class="spinner"></div>
-        <p style="font-size:12px; letter-spacing:1px; opacity:0.7;">TUNNELLING DATA...</p>
-    </div>
+    <div id="loader" class="loader"><div class="pulse"></div><p style="margin-top:20px; color:var(--text-dim); font-size:11px; letter-spacing:2px;">ENCRYPTING TUNNEL</p></div>
 </main>
 
 <script>
@@ -118,7 +121,7 @@
         const tab = document.createElement("div");
         tab.className = "tab";
         tab.id = `nav-${id}`;
-        tab.innerHTML = `<span class="tab-title">Empty Page</span><span class="close-tab" onclick="closeTab(event,'${id}')">×</span>`;
+        tab.innerHTML = `<span class="tab-title">New Tab</span><span class="close-tab" onclick="closeTab(event,'${id}')">×</span>`;
         tab.onclick = () => switchTab(id);
 
         const frame = document.createElement("iframe");
@@ -158,8 +161,6 @@
 
         document.getElementById('loader').style.display = 'flex';
         let targetUrl = "";
-        
-        // Advanced URL Detection
         const isUrl = /^(https?:\/\/)?([\w\d-]+\.)+[\w-]+(\/.*)?$/i.test(input) && !input.includes(" ");
 
         if (isUrl) {
@@ -172,18 +173,15 @@
         const proxy = document.getElementById("proxySelect").value;
         const activeFrame = document.getElementById(activeTabId);
         
-        // Update Tab Label
-        const label = isUrl ? input.replace('https://','').replace('www.','') : input;
-        document.getElementById(`nav-${activeTabId}`).querySelector('.tab-title').innerText = label.substring(0,12) + (label.length > 12 ? '..' : '');
+        // Shorten title for tab
+        let displayTitle = isUrl ? input.split('/')[0] : input;
+        if(displayTitle.length > 15) displayTitle = displayTitle.substring(0,12) + "...";
+        document.getElementById(`nav-${activeTabId}`).querySelector('.tab-title').innerText = displayTitle;
         
-        // Final Proxy Navigation
         activeFrame.src = proxy + encodeURIComponent(targetUrl);
     }
 
-    // Keyboard Support
     document.getElementById("urlBox").addEventListener("keypress", e => { if (e.key === "Enter") handleNavigation(); });
-    
-    // Start with a clean tab
     createNewTab();
 </script>
 
