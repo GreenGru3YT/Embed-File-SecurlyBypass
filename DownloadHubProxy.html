@@ -6,16 +6,21 @@
     <title>ShadowProxy | Stealth Browser</title>
     <style>
         :root {
-            --bg-dark: #0a0a0a;
-            --bg-panel: #141414;
-            --accent: #3b82f6;
-            --text-main: #f3f4f6;
-            --text-dim: #6b7280;
-            --border: #262626;
+            --bg-dark: #090909;
+            --bg-panel: #121212;
+            --accent: #3b82f6; /* Modern Blue */
+            --text-main: #f9fafb;
+            --text-dim: #71717a;
+            --border: #27272a;
             --input-bg: #000000;
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        * { 
+            box-sizing: border-box; 
+            margin: 0; 
+            padding: 0; 
+            font-family: 'Inter', -apple-system, system-ui, sans-serif; 
+        }
 
         body {
             background-color: var(--bg-dark);
@@ -30,15 +35,15 @@
         #browser-header {
             background: var(--bg-panel);
             border-bottom: 1px solid var(--border);
-            padding: 8px 15px;
+            padding: 10px 18px;
             z-index: 100;
         }
 
         .nav-controls {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             align-items: center;
-            max-width: 1600px;
+            max-width: 1400px;
             margin: 0 auto;
         }
 
@@ -51,31 +56,36 @@
             color: var(--accent);
             outline: none;
             font-size: 14px;
-            transition: all 0.2s ease;
+            letter-spacing: 0.3px;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        #urlBox:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+        #urlBox:focus { 
+            border-color: var(--accent); 
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.15); 
+        }
 
         select, button {
-            padding: 8px 14px;
-            border-radius: 6px;
+            padding: 9px 15px;
+            border-radius: 8px;
             border: 1px solid var(--border);
             background: var(--bg-panel);
             color: var(--text-main);
             font-size: 13px;
+            font-weight: 500;
             cursor: pointer;
             transition: 0.2s;
         }
 
-        button:hover { background: #1f1f1f; border-color: var(--text-dim); }
+        button:hover { background: #18181b; border-color: var(--text-dim); }
         .btn-primary { background: var(--accent); border-color: var(--accent); color: white; }
-        .btn-primary:hover { background: #2563eb; }
+        .btn-primary:hover { background: #2563eb; transform: translateY(-1px); }
 
         /* --- Tab System --- */
         #tabs-container {
             display: flex;
-            gap: 2px;
-            padding: 5px 15px 0 15px;
+            gap: 4px;
+            padding: 6px 18px 0 18px;
             background: var(--bg-panel);
             border-bottom: 1px solid var(--border);
         }
@@ -83,17 +93,20 @@
         .tab {
             display: flex;
             align-items: center;
-            gap: 8px;
-            padding: 8px 15px;
+            gap: 10px;
+            padding: 8px 16px;
             background: transparent;
             border: 1px solid transparent;
             border-radius: 8px 8px 0 0;
             cursor: pointer;
-            min-width: 100px;
-            max-width: 180px;
+            min-width: 120px;
+            max-width: 220px;
             font-size: 12px;
             color: var(--text-dim);
+            transition: 0.2s;
         }
+
+        .tab:hover { color: var(--text-main); background: rgba(255,255,255,0.03); }
 
         .tab.activeTab {
             background: var(--bg-dark);
@@ -104,28 +117,32 @@
         }
 
         .tab-title { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 1; }
-        .close-tab { font-size: 14px; opacity: 0.4; }
-        .close-tab:hover { opacity: 1; color: #f87171; }
+        .close-tab { font-size: 16px; opacity: 0.3; transition: 0.2s; }
+        .close-tab:hover { opacity: 1; color: #ef4444; }
 
         /* --- Viewport --- */
         #frames-viewport { flex: 1; position: relative; background: #fff; }
         iframe { position: absolute; width: 100%; height: 100%; border: none; display: none; }
         iframe.active { display: block; }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
     </style>
 </head>
 <body>
 
 <div id="browser-header">
     <div class="nav-controls">
-        <select id="proxySelect">
+        <select id="proxySelect" title="Switch Proxy Engine">
             <option value="https://api.allorigins.win/raw?url=">Proxy 1 (Stable)</option>
             <option value="https://corsproxy.io/?">Proxy 2 (Fast)</option>
-            <option value="https://api.codetabs.com/v1/proxy?quest=">Proxy 3 (Fallback)</option>
+            <option value="https://api.codetabs.com/v1/proxy?quest=">Proxy 3 (Lite)</option>
         </select>
-        <input id="urlBox" type="text" placeholder="Search Google or enter URL...">
+        <input id="urlBox" type="text" placeholder="Search DuckDuckGo or enter URL...">
         <button class="btn-primary" onclick="handleNavigation()">Go</button>
         <button onclick="createNewTab()" title="New Tab">+</button>
-        <button onclick="downloadCurrentPage()">Save Page</button>
+        <button onclick="downloadCurrentPage()" title="Download Page Source">Save</button>
     </div>
 </div>
 
@@ -176,9 +193,6 @@
             targetTab.classList.add("activeTab");
             targetFrame.classList.add("active");
             activeTabId = id;
-            
-            // Sync URL box with frame's current context (if possible)
-            // Note: Limited due to cross-origin security
         }
     }
 
@@ -202,29 +216,28 @@
         if (!input) return;
 
         let finalUrl = "";
-
-        // Logic to determine if it's a URL or a Search query
-        const isUrl = /^(https?:\/\/)?([\w\d-]+\.)+[\w-]+(\/.*)?$/i.test(input) || input.includes("localhost") || input.includes(":");
+        
+        // RegEx to check if input is a valid URL (contains a dot and no spaces)
+        const isUrl = /^(https?:\/\/)?([\w\d-]+\.)+[\w-]+(\/.*)?$/i.test(input) && !input.includes(" ");
 
         if (isUrl) {
             finalUrl = input.startsWith("http") ? input : "https://" + input;
         } else {
-            // It's a search term!
-            finalUrl = "https://www.google.com/search?q=" + encodeURIComponent(input);
+            // Updated to DuckDuckGo Search!
+            finalUrl = "https://duckduckgo.com/?q=" + encodeURIComponent(input);
         }
 
         const activeFrame = document.getElementById(activeTabId);
         const activeTabNav = document.getElementById(`nav-${activeTabId}`).querySelector('.tab-title');
         
-        // Update Tab Name
-        activeTabNav.innerText = isUrl ? input.replace(/https?:\/\//, '') : "Search: " + input;
+        // Visual updates
+        activeTabNav.innerText = isUrl ? input.replace(/https?:\/\//, '') : "DDG: " + input;
         
         // Load through Proxy
         activeFrame.src = getSelectedProxy() + encodeURIComponent(finalUrl);
     }
 
     async function downloadCurrentPage() {
-        // We use the proxy to fetch the data so we don't get blocked by CORS
         const activeFrame = document.getElementById(activeTabId);
         if(!activeFrame.src || activeFrame.src === "about:blank") return alert("No page loaded");
 
@@ -235,19 +248,18 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement("a");
             a.href = url;
-            a.download = "shadow_capture.html";
+            a.download = "shadow_source.html";
             a.click();
         } catch (e) {
-            alert("Could not save page. The proxy might be blocking direct downloads.");
+            alert("Security Error: This site or proxy blocks manual saving.");
         }
     }
 
-    // Enter Key Support
     document.getElementById("urlBox").addEventListener("keypress", e => {
         if (e.key === "Enter") handleNavigation();
     });
 
-    // Start with one tab
+    // Start
     createNewTab();
 </script>
 
