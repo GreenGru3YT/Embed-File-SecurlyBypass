@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ShadowProxy | Ultra Max</title>
+    <title>ShadowProxy | Intelligence Edition</title>
     <style>
         :root {
             --bg-dark: #050505;
@@ -12,102 +12,128 @@
             --text-main: #f3f4f6;
             --text-dim: #71717a;
             --border: #222222;
+            --success: #22c55e;
+            --warning: #eab308;
+            --danger: #ef4444;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', system-ui, sans-serif; }
         body { background-color: var(--bg-dark); height: 100vh; overflow: hidden; color: var(--text-main); display: flex; flex-direction: column; }
 
-        /* --- UI Header --- */
+        /* --- Header --- */
         header { background: var(--bg-panel); border-bottom: 1px solid var(--border); padding: 12px 18px; z-index: 100; }
         .nav-row { display: flex; gap: 8px; align-items: center; max-width: 1600px; margin: 0 auto; width: 100%; }
         
-        #urlBox { flex: 1; padding: 11px 16px; border-radius: 10px; border: 1px solid var(--border); background: #000; color: var(--accent); outline: none; font-size: 14px; }
-        #urlBox:focus { border-color: var(--accent); }
+        /* Proxy Status Wrapper */
+        .proxy-wrapper { display: flex; align-items: center; gap: 8px; background: #1a1a1a; padding: 4px 10px; border-radius: 8px; border: 1px solid var(--border); }
+        #status-dot { width: 8px; height: 8px; background: var(--text-dim); border-radius: 50%; box-shadow: 0 0 5px rgba(0,0,0,0.5); }
 
-        select, button { padding: 9px 12px; border-radius: 8px; border: 1px solid var(--border); background: #1a1a1a; color: var(--text-main); font-size: 12px; cursor: pointer; }
-        .go-btn { background: var(--accent); border-color: var(--accent); font-weight: 700; color: #fff; }
+        #urlBox { flex: 1; padding: 11px 16px; border-radius: 10px; border: 1px solid var(--border); background: #000; color: var(--accent); outline: none; font-size: 14px; }
+        #urlBox:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1); }
+
+        select, button { padding: 8px 12px; border-radius: 8px; border: 1px solid var(--border); background: #1a1a1a; color: var(--text-main); font-size: 12px; cursor: pointer; border: none; }
+        select { background: transparent; outline: none; font-size: 11px; }
+        .go-btn { background: var(--accent); font-weight: 700; color: #fff; padding: 10px 20px; }
 
         /* --- Tabs --- */
         #tabs-bar { display: flex; gap: 4px; padding: 6px 15px 0; background: var(--bg-panel); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
-        .tab { display: flex; align-items: center; gap: 10px; padding: 10px 18px; background: rgba(255,255,255,0.02); border: 1px solid transparent; border-radius: 8px 8px 0 0; cursor: pointer; font-size: 11px; color: var(--text-dim); min-width: 120px; white-space: nowrap; }
+        .tab { display: flex; align-items: center; gap: 10px; padding: 10px 18px; background: rgba(255,255,255,0.02); border-radius: 8px 8px 0 0; cursor: pointer; font-size: 11px; color: var(--text-dim); min-width: 120px; white-space: nowrap; border: 1px solid transparent; }
         .tab.activeTab { background: var(--bg-dark); color: var(--text-main); border: 1px solid var(--border); border-bottom: 1px solid var(--bg-dark); margin-bottom: -1px; }
 
         /* --- Viewport --- */
         main { flex: 1; position: relative; background: #fff; }
         iframe { position: absolute; width: 100%; height: 100%; border: none; display: none; }
         iframe.active { display: block; }
+        
         .loader { position: absolute; inset: 0; background: var(--bg-dark); z-index: 50; display: none; align-items: center; justify-content: center; flex-direction: column; }
+        .spinner { width: 24px; height: 24px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
 <header>
     <div class="nav-row">
-        <select id="proxySelect">
-            <optgroup label="Primary Tunnels">
-                <option value="https://corsproxy.io/?">🚀 Proxy 1 (Fastest)</option>
-                <option value="https://api.allorigins.win/raw?url=">⚡ Proxy 2 (Direct)</option>
-                <option value="https://api.codetabs.com/v1/proxy?quest=">🛡️ Proxy 3 (Stealth)</option>
-            </optgroup>
-            <optgroup label="Backup Tunnels">
-                <option value="https://proxy.cors.sh/">🌐 Proxy 4 (Stable)</option>
-                <option value="https://thingproxy.freeboard.io/fetch/">📁 Proxy 5 (Lite)</option>
-                <option value="https://whateverorigin.org/get?url=">🌀 Proxy 6 (Backup)</option>
-            </optgroup>
-        </select>
+        <div class="proxy-wrapper">
+            <div id="status-dot"></div>
+            <select id="proxySelect" onchange="checkProxyHealth()">
+                <optgroup label="Standard (High Compatibility)">
+                    <option value="https://api.allorigins.win/raw?url=">Node Alpha (AllOrigins)</option>
+                    <option value="https://whateverorigin.org/get?url=">Node Beta (WhateverOrigin)</option>
+                </optgroup>
+                <optgroup label="High-Speed">
+                    <option value="https://corsproxy.io/?">Turbo Node 1 (CORS.io)</option>
+                    <option value="https://proxy.cors.sh/">Turbo Node 2 (CORS.sh)</option>
+                </optgroup>
+                <optgroup label="Stealth / Fallback">
+                    <option value="https://api.codetabs.com/v1/proxy?quest=">Ghost Node (CodeTabs)</option>
+                    <option value="https://thingproxy.freeboard.io/fetch/">Lite Node (ThingProxy)</option>
+                    <option value="https://api.proxyscrape.com/v2/?request=getproxies&protocol=http&url=">Scrape Node (Rotating)</option>
+                </optgroup>
+            </select>
+        </div>
 
         <select id="engineSelect">
-            <optgroup label="Main Browsers/Engines">
+            <optgroup label="Browsers">
                 <option value="https://duckduckgo.com/?q=">DuckDuckGo</option>
                 <option value="https://www.google.com/search?q=">Google</option>
                 <option value="https://search.brave.com/search?q=">Brave</option>
                 <option value="https://www.bing.com/search?q=">Bing</option>
                 <option value="https://search.yahoo.com/search?p=">Yahoo</option>
-                <option value="https://www.google.com/search?q=firefox+browser+">Firefox Mode</option>
-                <option value="https://www.google.com/search?q=opera+browser+">Opera Mode</option>
+                <option value="https://www.google.com/search?q=firefox+browser+">Firefox</option>
+                <option value="https://www.google.com/search?q=opera+browser+">Opera</option>
             </optgroup>
-            <optgroup label="Privacy & Meta">
+            <optgroup label="Privacy & Specialty">
                 <option value="https://www.startpage.com/sp/search?query=">Startpage</option>
                 <option value="https://www.qwant.com/?q=">Qwant</option>
-                <option value="https://searx.be/search?q=">SearXNG</option>
-                <option value="https://www.ecosia.org/search?q=">Ecosia</option>
-                <option value="https://www.mojeek.com/search?q=">Mojeek</option>
-                <option value="https://www.swisscows.com/web?query=">Swisscows</option>
-            </optgroup>
-            <optgroup label="Knowledge & Archive">
-                <option value="https://scholar.google.com/scholar?q=">Google Scholar</option>
-                <option value="https://www.wolframalpha.com/input/?i=">WolframAlpha</option>
-                <option value="https://archive.org/search.php?query=">Internet Archive</option>
-                <option value="https://en.wikipedia.org/wiki/Special:Search?search=">Wikipedia</option>
-                <option value="https://www.jstor.org/action/doBasicSearch?Query=">JSTOR</option>
-            </optgroup>
-            <optgroup label="International">
-                <option value="https://yandex.com/search/?text=">Yandex (Russia)</option>
-                <option value="https://www.baidu.com/s?wd=">Baidu (China)</option>
-                <option value="https://www.naver.com/search.naver?query=">Naver (Korea)</option>
-                <option value="https://www.ecosia.org/search?q=">Ecosia (Eco)</option>
-            </optgroup>
-            <optgroup label="Deep/Specialty">
-                <option value="https://ahmia.fi/search/?q=">Ahmia (Onion Search)</option>
-                <option value="https://torchsearch.com/search?q=">Torch</option>
-                <option value="https://www.re-search.it/search?q=">Re-Search</option>
+                <option value="https://yandex.com/search/?text=">Yandex</option>
+                <option value="https://ahmia.fi/search/?q=">Ahmia (Deep Web)</option>
+                <option value="https://archive.org/search.php?query=">Wayback Machine</option>
             </optgroup>
         </select>
 
         <input id="urlBox" type="text" placeholder="Search or enter URL...">
         <button class="go-btn" onclick="handleNavigation()">Go</button>
-        <button onclick="createNewTab()">+</button>
+        <button onclick="createNewTab()" title="New Tab">+</button>
     </div>
 </header>
 
 <div id="tabs-bar"></div>
 <main id="frames-viewport">
-    <div id="loader" class="loader"><p>Establishing Tunnel...</p></div>
+    <div id="loader" class="loader"><div class="spinner"></div><p style="margin-top:10px; font-size:10px; color:var(--text-dim);">TUNNELING...</p></div>
 </main>
 
 <script>
     let tabCount = 0;
     let activeTabId = null;
+
+    // --- PROXY HEALTH CHECKER ---
+    async function checkProxyHealth() {
+        const dot = document.getElementById('status-dot');
+        const proxyBase = document.getElementById('proxySelect').value;
+        dot.style.background = 'var(--warning)'; // Testing...
+
+        try {
+            // We "ping" the proxy by requesting a tiny resource
+            const testUrl = encodeURIComponent('https://www.google.com/favicon.ico');
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 4000); // 4s timeout
+
+            const response = await fetch(proxyBase + testUrl, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            if (response.ok) {
+                dot.style.background = 'var(--success)';
+                dot.title = "Proxy is Online";
+            } else {
+                dot.style.background = 'var(--warning)';
+                dot.title = "Proxy is Rate Limited or Slow";
+            }
+        } catch (e) {
+            dot.style.background = 'var(--danger)';
+            dot.title = "Proxy Offline or Blocked";
+        }
+    }
 
     function createNewTab() {
         tabCount++;
@@ -115,7 +141,7 @@
         const tab = document.createElement("div");
         tab.className = "tab";
         tab.id = `nav-${id}`;
-        tab.innerHTML = `<span class="tab-title">New Tab</span><span class="close-tab" onclick="closeTab(event,'${id}')" style="margin-left:10px;opacity:0.5">×</span>`;
+        tab.innerHTML = `<span class="tab-title">New Tab</span><span onclick="closeTab(event,'${id}')" style="margin-left:10px;opacity:0.4">×</span>`;
         tab.onclick = () => switchTab(id);
 
         const frame = document.createElement("iframe");
@@ -168,13 +194,16 @@
         const activeFrame = document.getElementById(activeTabId);
         
         let label = isUrl ? input : input;
-        document.getElementById(`nav-${activeTabId}`).querySelector('.tab-title').innerText = label.substring(0,15);
+        document.getElementById(`nav-${activeTabId}`).querySelector('.tab-title').innerText = label.substring(0,14);
         
         activeFrame.src = proxy + encodeURIComponent(targetUrl);
     }
 
     document.getElementById("urlBox").addEventListener("keypress", e => { if (e.key === "Enter") handleNavigation(); });
+    
+    // Initial Health Check and Startup
     createNewTab();
+    checkProxyHealth();
 </script>
 
 </body>
